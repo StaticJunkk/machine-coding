@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Repository
 @Slf4j
@@ -29,6 +30,7 @@ public class AppointmentDataStore implements IAppointmentDataStore {
     private final ISlotFrequencyTypeRepository slotFrequencyTypeRepository;
     private final IServiceProviderRepository serviceProviderRepository;
     private final IStatusRepository statusRepository;
+    private final ReentrantLock lock = new ReentrantLock();
 
     @Autowired
     public AppointmentDataStore(ICalendarRepository calendarRepository,
@@ -47,16 +49,24 @@ public class AppointmentDataStore implements IAppointmentDataStore {
 
     @Override
     public Calendar createAppointment(Calendar requestEntity) throws DataStoreException {
-        List<Calendar> calendarList =
-                calendarRepository.findAllByServiceProviderAndNotCancelled(requestEntity.getServiceProvider());
-        if (calendarList.stream().anyMatch(item -> item.getStartDatetime().equals(requestEntity.getStartDatetime()))) {
-            log.info("YAHA BHI AYA");
-            log.error("Service Provider - {} Slot {} already booked!", requestEntity.getServiceProvider().getId(), requestEntity.getStartDatetime());
-            throw new DataStoreException(String.format("Service Provider - %s Slot - %s already booked!",
-                    requestEntity.getServiceProvider().getId(),
-                    requestEntity.getStartDatetime()));
+        lock.lock();
+        try {
+            List<Calendar> calendarList =
+                    calendarRepository.findAllByServiceProviderAndNotCancelled(requestEntity.getServiceProvider());
+            if (calendarList.stream()
+                    .anyMatch(item -> item.getStartDatetime().equals(requestEntity.getStartDatetime()))) {
+                log.info("YAHA BHI AYA");
+                log.error("Service Provider - {} Slot {} already booked!",
+                        requestEntity.getServiceProvider().getId(),
+                        requestEntity.getStartDatetime());
+                throw new DataStoreException(String.format("Service Provider - %s Slot - %s already booked!",
+                        requestEntity.getServiceProvider().getId(),
+                        requestEntity.getStartDatetime()));
+            }
+            return calendarRepository.save(requestEntity);
+        } finally {
+            lock.unlock();
         }
-        return calendarRepository.save(requestEntity);
     }
 
     @Override
@@ -69,15 +79,25 @@ public class AppointmentDataStore implements IAppointmentDataStore {
 
     @Override
     public Calendar modifyAppointment(Calendar requestEntity) throws DataStoreException {
-        Optional<Calendar> calendarBooking =
-                calendarRepository.findById(requestEntity.getId());
-        if (calendarBooking.isPresent() && calendarBooking.get().getStatus().getId().equals(StatusType.CANCELED.getId())) {
-            log.error("Service Provider - {} Slot {} already canceled!", requestEntity.getServiceProvider().getId(), requestEntity.getStartDatetime());
-            throw new DataStoreException(String.format("Service Provider - %s Slot - %s already canceled!",
-                    requestEntity.getServiceProvider().getId(),
-                    requestEntity.getStartDatetime()));
-        }
+        lock.lock();
+        try {
+            Optional<Calendar> calendarBooking =
+                    calendarRepository.findById(requestEntity.getId());
+            if (calendarBooking.isPresent() && calendarBooking.get()
+                    .getStatus()
+                    .getId()
+                    .equals(StatusType.CANCELED.getId())) {
+                log.error("Service Provider - {} Slot {} already canceled!",
+                        requestEntity.getServiceProvider().getId(),
+                        requestEntity.getStartDatetime());
+                throw new DataStoreException(String.format("Service Provider - %s Slot - %s already canceled!",
+                        requestEntity.getServiceProvider().getId(),
+                        requestEntity.getStartDatetime()));
+            }
 
-        return calendarRepository.save(requestEntity);
+            return calendarRepository.save(requestEntity);
+        } finally {
+            lock.unlock();
+        }
     }
 }
