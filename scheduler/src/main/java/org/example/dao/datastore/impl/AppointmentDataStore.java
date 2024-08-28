@@ -55,7 +55,6 @@ public class AppointmentDataStore implements IAppointmentDataStore {
                     calendarRepository.findAllByServiceProviderAndNotCancelled(requestEntity.getServiceProvider());
             if (calendarList.stream()
                     .anyMatch(item -> item.getStartDatetime().equals(requestEntity.getStartDatetime()))) {
-                log.info("YAHA BHI AYA");
                 log.error("Service Provider - {} Slot {} already booked!",
                         requestEntity.getServiceProvider().getId(),
                         requestEntity.getStartDatetime());

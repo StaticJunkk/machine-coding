@@ -43,68 +43,58 @@ public class AppointmentController {
 
     @PostMapping("/create")
     public ResponseEntity<CreateAppointmentResponse> createAppointment(@RequestBody CreateAppointmentRequest createAppointmentRequest) throws ServiceException {
-        try {
-            log.info("YAHA TOH AYA");
-            return new ResponseEntity<>(transformer.getAppointmentBookingResponse(appointmentService.createAppointment(
-                    transformer.getAppointmentBookingRequest(
-                            createAppointmentRequest))), HttpStatus.OK);
-        }
-        catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(transformer.getAppointmentBookingResponse(appointmentService.createAppointment(
+                transformer.getAppointmentBookingRequest(
+                        createAppointmentRequest))), HttpStatus.OK);
+
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ModifyAppointmentResponse> updateAppointment(@RequestBody ModifyAppointmentRequest request) {
-        try {
-            return new ResponseEntity<>(transformer.getAppointmentModificationResponse(appointmentService.modifyAppointment(transformer.getAppointmentModificationRequest(
-                    request))), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<ModifyAppointmentResponse> updateAppointment(@RequestBody ModifyAppointmentRequest request) throws ServiceException {
+        return new ResponseEntity<>(transformer.getAppointmentModificationResponse(appointmentService.modifyAppointment(
+                transformer.getAppointmentModificationRequest(
+                        request))), HttpStatus.OK);
+
     }
 
     @GetMapping("{serviceType}/providers/{serviceProviderId}/availability/")
     public ResponseEntity<List<FetchAvailabilityResponse>> getAvailability(@PathVariable ServiceType serviceType,
-                                                           @PathVariable Long serviceProviderId) throws ServiceException {
-        try {
-            FetchAvailabilityRequest request = FetchAvailabilityRequest.builder()
-                    .serviceType(serviceType)
-                    .serviceProviderId(serviceProviderId)
-                    .build();
-            return new ResponseEntity<>(transformer.getAvailabilityResponse(appointmentService.fetchAvailability(transformer.fetchAvailabilityRequestDTO(
-                    request))), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+                                                                           @PathVariable Long serviceProviderId) throws ServiceException {
+
+        FetchAvailabilityRequest request = FetchAvailabilityRequest.builder()
+                .serviceType(serviceType)
+                .serviceProviderId(serviceProviderId)
+                .build();
+        return new ResponseEntity<>(transformer.getAvailabilityResponse(appointmentService.fetchAvailability(
+                transformer.fetchAvailabilityRequestDTO(
+                        request))), HttpStatus.OK);
+
     }
 
     @GetMapping("{serviceType}/providers/availability/")
     public ResponseEntity<List<FetchAvailabilityResponse>> getAvailability(@PathVariable ServiceType serviceType) throws ServiceException {
-        try {
-            FetchAvailabilityRequest request = FetchAvailabilityRequest.builder()
-                    .serviceType(serviceType)
-                    .build();
-            return new ResponseEntity<>(transformer.getAvailabilityResponse(appointmentService.fetchAvailability(transformer.fetchAvailabilityRequestDTO(
-                    request))), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
+        FetchAvailabilityRequest request = FetchAvailabilityRequest.builder()
+                .serviceType(serviceType)
+                .build();
+        return new ResponseEntity<>(transformer.getAvailabilityResponse(appointmentService.fetchAvailability(
+                transformer.fetchAvailabilityRequestDTO(
+                        request))), HttpStatus.OK);
+
     }
 
     @GetMapping("{serviceType}/providers/{serviceProviderId}/appointments/")
     public ResponseEntity<List<FetchAppointmentResponse>> getAppointments(@PathVariable ServiceType serviceType,
-                                                          @PathVariable Long serviceProviderId) throws ServiceException {
-        try {
-            FetchAppointmentsRequest request = FetchAppointmentsRequest.builder()
-                    .serviceType(serviceType)
-                    .serviceProviderId(serviceProviderId)
-                    .build();
-            return new ResponseEntity<>(transformer.getAppointmentsResponse(appointmentService.fetchAppointment(transformer.fetchAppointmentRequestDTO(
-                    request))), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+                                                                          @PathVariable Long serviceProviderId) throws ServiceException {
+
+        FetchAppointmentsRequest request = FetchAppointmentsRequest.builder()
+                .serviceType(serviceType)
+                .serviceProviderId(serviceProviderId)
+                .build();
+        return new ResponseEntity<>(transformer.getAppointmentsResponse(appointmentService.fetchAppointment(
+                transformer.fetchAppointmentRequestDTO(
+                        request))), HttpStatus.OK);
+
     }
 
 }
